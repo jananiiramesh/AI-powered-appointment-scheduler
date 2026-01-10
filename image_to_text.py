@@ -6,7 +6,7 @@ ocr = PaddleOCR(
     use_textline_orientation=True
 )
 
-result = ocr.predict("test2.jpeg")
+result = ocr.predict("test4.jpeg")
 
 page = result[0]
 
@@ -35,7 +35,13 @@ structured = [
 
 structured.sort(key=lambda x: (x["box"][0][1], x["box"][0][0]))
 
-for item in structured:
-    print(f"{item['text']}  | confidence: {item['confidence']:.3f}")
+final_text = "\n".join(item["text"] for item in structured)
+
+avg_conf = sum(item["confidence"] for item in structured) / len(structured)
+
+print("----- FINAL TEXT -----")
+print(final_text)
+print(f"\nAverage OCR confidence: {avg_conf:.3f}")
+
 
 
