@@ -1,6 +1,4 @@
 import torch
-import re
-import json
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 
@@ -92,9 +90,9 @@ NOW EXTRACT FROM THIS TEXT:
             )
 
         decoded = self.tokenizer.decode(output_ids[0], skip_special_tokens=True)
-        print(decoded)
+        return decoded
 
-        # ---- Strict JSON extraction ----
+        ### Strict JSON extraction
         # match = re.search(r"\{.*\}", decoded, re.DOTALL)
         # if not match:
         #     raise ValueError("Model did not return valid JSON")
