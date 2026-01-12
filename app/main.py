@@ -8,10 +8,11 @@ app = Flask(__name__)
 def classify_input():
     if request.content_type == "text/plain":
         text = request.get_data(as_text=True)
-        return jsonify({
-            "input_type": "raw text",
-            "content": text
-        })
+        # testing code
+        # return jsonify({
+        #     "input_type": "raw text",
+        #     "content": text
+        # })
     
     # if request.is_json:
     #     data = request.get_json()
