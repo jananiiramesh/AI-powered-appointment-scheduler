@@ -1,4 +1,7 @@
 from flask import Flask, request, jsonify
+from tools.image_to_text import OCRTextCleaner
+from tools.text_extractor_qwen import TextExtractor
+from tools.text_normalizer import TextNormalizer
 from PIL import Image
 import io
 
@@ -13,14 +16,6 @@ def classify_input():
         #     "input_type": "raw text",
         #     "content": text
         # })
-    
-    # if request.is_json:
-    #     data = request.get_json()
-    #     if "text" in data:
-    #         return jsonify({
-    #             "input_type":"text",
-    #             "content": data["text"]
-    #         })
         
     elif "image" in request.files:
         image_file = request.files["image"]
