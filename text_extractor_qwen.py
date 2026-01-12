@@ -1,4 +1,5 @@
 import torch
+import json
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 
@@ -13,6 +14,30 @@ class TextExtractor:
             device_map="auto"
         )
 
+    def _extract_json(self, text: str) -> dict | None:
+        """
+        Extracts and parses the first valid JSON object from model output.
+        Returns dict if successful, else None.
+        """
+
+        if not text:
+            return None
+
+        # Find JSON boundaries
+        start = text.find("{")
+        end = text.rfind("}")
+
+        if start == -1 or end == -1 or start >= end:
+            return None
+
+        json_str = text[start:end + 1].strip()
+
+        try:
+            return json.loads(json_str)
+        except json.JSONDecodeError:
+            return None
+
+
     def _build_prompt(self, ocr_text: str) -> str:
         return f"""
 You are an information extraction system.
@@ -22,7 +47,7 @@ Extract ONLY appointment-related information.
 APPOINTMENT DEFINITION:
 An appointment is a scheduled meeting, visit, or consultation.
 
-JSON SCHEMA (return EXACTLY this):
+JSON SCHEMA (return EXACTLY only this):
 {{
   "entities": {{
     "date_phrase": "<string or 'not specified'>",
@@ -77,27 +102,29 @@ NOW EXTRACT FROM THIS TEXT:
         inputs = self.tokenizer.apply_chat_template(
             messages,
             tokenize=True,
-            add_generation_prompt=True,
+            add_generation_prompt=False,
             return_tensors="pt"
         ).to(self.model.device)
 
         with torch.no_grad():
             output_ids = self.model.generate(
-                inputs,
-                max_new_tokens=120,
-                do_sample=False,
-                eos_token_id=self.tokenizer.eos_token_id
-            )
+            inputs,
+            max_new_tokens=120,
+            do_sample=False,
+            eos_token_id=self.tokenizer.eos_token_id
+        )
 
-        decoded = self.tokenizer.decode(output_ids[0], skip_special_tokens=True)
-        return decoded
+        generated_ids = output_ids[:, inputs.shape[-1]:]
 
-        ### Strict JSON extraction
-        # match = re.search(r"\{.*\}", decoded, re.DOTALL)
-        # if not match:
-        #     raise ValueError("Model did not return valid JSON")
+        decoded = self.tokenizer.batch_decode(
+            generated_ids,
+            skip_special_tokens=True
+        )[0].strip()
 
-        # return json.loads(match.group())
+        decoded = decoded.strip()
+        result = self._extract_json(decoded)
+        return result
+
 
 extractor = TextExtractor()
 
