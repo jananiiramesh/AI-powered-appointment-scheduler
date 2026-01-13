@@ -76,7 +76,6 @@ The outputs of all the three text processing modules are in strict json format m
 
 ---
 ### Sample Postman Requests
-ngrok url: https://harry-wealthy-cajolingly.ngrok-free.dev/appointment
 - Trying putting text like "Book dermatalogist appointment at 6pm today" keeping body settings as "raw" and "text". Send a POST request
 - Add images with appointment related text using "form-data" option with value type set as "file". Send a POST request with image. NOTE: put key as "image".
 
