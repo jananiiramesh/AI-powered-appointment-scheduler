@@ -16,7 +16,7 @@ cd AI-powered-appointment-scheduler
 ## 2️⃣ Create a Virtual Environment
 ```bash
 python -m venv venv
-venv\Scripts\activate
+venv\Scripts\Activate
 ```
 ## 3️⃣ Install all dependencies
 ```bash
