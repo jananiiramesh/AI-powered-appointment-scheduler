@@ -8,35 +8,35 @@ The system is designed as a foundational component for a larger, intelligent app
 ## 🛠️ Setup Instructions
 
 Follow the steps to run the project
-## 1️⃣ Clone the Repository
+### 1️⃣ Clone the Repository
 ```bash
 git clone "https://github.com/jananiiramesh/AI-powered-appointment-scheduler"
 cd AI-powered-appointment-scheduler
 ```
-## 2️⃣ Create a Virtual Environment
+### 2️⃣ Create a Virtual Environment
 ```bash
 python -m venv venv
 venv\Scripts\Activate
 ```
-## 3️⃣ Install all dependencies
+### 3️⃣ Install all dependencies
 ```bash
 pip install -r requirements.txt
 ```
-## 4️⃣ Download and Configure ngrok
+### 4️⃣ Download and Configure ngrok
 Create an account, download and install ngrok on your system. Then authenticate ngrok using your auth token
 ```bash
 ngrok config add-authtoken YOUR_NGROK_AUTH_TOKEN
 ```
-## 5️⃣ Run the Flask Application
+### 5️⃣ Run the Flask Application
 ```bash
 cd app
 python main.py
 ```
-## 6️⃣ Expose the API using ngrok
+### 6️⃣ Expose the API using ngrok
 ```bash
 ngrok http 5000
 ```
-## 7️⃣ Test the API
+### 7️⃣ Test the API
 Test the API using Postman or any http client by sending requests to the ngrok generated URL (since the api endpoint is '/appointment', add it to the url). Sample input images are given in app/sample_inputs.
 
 ---
@@ -52,7 +52,7 @@ The system depends particularly on 4 modules
 The working pipeline has been illustrated in the figure 
 ![Architecture Diagram](app/Architecture.png)
 
-# Brief summary on the separate modules:
+## Brief summary on the separate modules:
 - OCRProcessor:
 The OCRProcessor module is responsible for performing optical character recognition (OCR) on image inputs represented as NumPy arrays. It acts as a wrapper around a singleton OCR engine and converts low-level OCR predictions into a structured, readable format. The key highlights are the usage of a singleton (shared) OCR instance. The PaddleOCR module (known for being able to handle noisy images) has been used.
 
