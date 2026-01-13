@@ -75,8 +75,12 @@ Each heavy model (OCR engine and language models) is loaded exactly once per pro
 The outputs of all the three text processing modules are in strict json format making it easy to process and proceed to next step. A key exit condition has been defined in the TextNormalizer component, where insufficient date/time/department details leads to an exit condition (alerting the user to provide sufficient details).
 
 ---
-### Sample Postman Requests (for reference)
-- 
+### Sample Postman Requests
+ngrok url: https://harry-wealthy-cajolingly.ngrok-free.dev/appointment
+Trying putting text like "Book dermatalogist appointment at 6pm today" keeping body settings as "raw" and "text". Send a POST request
+Add images with appointment related text using "form-data" option with value type set as "file". Send a POST request with image.
+
+
 
 
 
