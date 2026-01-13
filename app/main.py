@@ -15,7 +15,7 @@ entity_extractor = TextExtractor()
 text_normalizer = TextNormalizer()
 print("agents have begun their work")
 
-@app.route("/classify", methods=["POST"])
+@app.route("/appointment", methods=["POST"])
 def classify_input():
     # if its text input:
     if request.content_type == "text/plain":
