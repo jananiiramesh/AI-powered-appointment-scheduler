@@ -27,6 +27,7 @@ class TextExtractor:
 
         try:
             extract = json.loads(json_str)
+            print(extract)
             return extract
         except json.JSONDecodeError:
             return None
