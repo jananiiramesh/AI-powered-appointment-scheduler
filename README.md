@@ -1,4 +1,4 @@
-### AI-powered-appointment-scheduler-assistant
+# AI-powered-appointment-scheduler-assistant
 
 This project is a Flask-based API that accepts **image and text inputs** from users, extracts appointment or meeting-related information, and normalizes it into **local ISO date/time formats and local time zones**.  
 The system is designed as a foundational component for a larger, intelligent appointment scheduling platform.
@@ -66,13 +66,17 @@ The TextExtractor module is responsible for structured information extraction fr
 The TextNormalizer module is responsible for converting extracted appointment date and time phrases into precise, machine-readable formats. It transforms natural language expressions into ISO-standard date and 24-hour time values, grounded in the local timezone. Uses a shared singleton Qwen language model for deterministic and consistent normalization. Normalizes relative and absolute date/time phrases using a fixed reference: Local timezone: Asia/Kolkata (IST), Current date and day as context
 
 ---
-# Key Architecture Highlights
-# Singleton Architecture for Model Management
+## Key Architecture Highlights
+### Singleton Architecture for Model Management
 This project uses a singleton architecture for all large machine learning models (OCR and LLMs) to ensure high performance, memory efficiency, and system stability.
 Each heavy model (OCR engine and language models) is loaded exactly once per process and then shared across all pipeline components, thus saving memory and reducing overhead.
 
-# JSON schema and Guardrails
+### JSON schema and Guardrails
 The outputs of all the three text processing modules are in strict json format making it easy to process and proceed to next step. A key exit condition has been defined in the TextNormalizer component, where insufficient date/time/department details leads to an exit condition (alerting the user to provide sufficient details).
+
+---
+### Sample Postman Requests (for reference)
+- 
 
 
 
