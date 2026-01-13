@@ -4,4 +4,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+<<<<<<< HEAD
 test.py
+=======
+>>>>>>> 303201eb83667d203d11c4ad95998702201c049c
