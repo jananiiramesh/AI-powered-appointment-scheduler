@@ -59,10 +59,10 @@ The OCRProcessor module is responsible for performing optical character recognit
 - TextCleaner:
 The TextCleaner module is responsible for cleaning raw text (decoding short forms, special characters, etc) using a large language model. It improves OCR or user-provided text quality while preserving the original meaning. Uses a singleton Qwen language model for consistent and efficient inference. Ensures no information is added, removed, or summarized.
 
-- TextExtractor
+- TextExtractor:
 The TextExtractor module is responsible for structured information extraction from cleaned OCR or user-provided text. It uses a large language model to identify appointment-related entities and return them in a strict JSON format. Uses a singleton Qwen language model to ensure consistent and efficient inference. Extracts only appointment-relevant information: Date phrase, Time phrase, Department or meeting context
 
-- TextNormalizer
+- TextNormalizer:
 The TextNormalizer module is responsible for converting extracted appointment date and time phrases into precise, machine-readable formats. It transforms natural language expressions into ISO-standard date and 24-hour time values, grounded in the local timezone. Uses a shared singleton Qwen language model for deterministic and consistent normalization. Normalizes relative and absolute date/time phrases using a fixed reference: Local timezone: Asia/Kolkata (IST), Current date and day as context
 
 ---
