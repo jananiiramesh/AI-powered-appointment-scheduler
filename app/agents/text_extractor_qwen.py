@@ -1,18 +1,12 @@
 import torch
 import json
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from agents.llms.singleton import get_qwen
 
 
 class TextExtractor:
-    def __init__(self, model_id="Qwen/Qwen2.5-1.5B-Instruct"):
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-
-        self.tokenizer = AutoTokenizer.from_pretrained(model_id)
-        self.model = AutoModelForCausalLM.from_pretrained(
-            model_id,
-            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-            device_map="auto"
-        )
+    def __init__(self):
+        # 🔹 Singleton model, tokenizer, device, lock
+        self.model, self.tokenizer, self.device, self.lock = get_qwen()
 
     def _extract_json(self, text: str) -> dict | None:
         """
@@ -23,7 +17,6 @@ class TextExtractor:
         if not text:
             return None
 
-        # find first and last curly braces - simple logic, check if it works.
         start = text.find("{")
         end = text.rfind("}")
 
@@ -36,7 +29,6 @@ class TextExtractor:
             return json.loads(json_str)
         except json.JSONDecodeError:
             return None
-
 
     def _build_prompt(self, ocr_text: str) -> str:
         return f"""
@@ -66,6 +58,8 @@ RULES:
 - Output ONLY valid JSON
 - Start the response with {{ and end with }}
 - Do NOT add explanations or extra text
+
+NOTE: All fields of the JSON output schema MUST be present in your answer. Do NOT omit field.
 
 EXAMPLE:
 
@@ -102,17 +96,19 @@ NOW EXTRACT FROM THIS TEXT:
         inputs = self.tokenizer.apply_chat_template(
             messages,
             tokenize=True,
-            add_generation_prompt=False,
+            add_generation_prompt=True,
             return_tensors="pt"
-        ).to(self.model.device)
-
-        with torch.no_grad():
-            output_ids = self.model.generate(
-            inputs,
-            max_new_tokens=120,
-            do_sample=False,
-            eos_token_id=self.tokenizer.eos_token_id
         )
+
+        inputs = inputs.to(self.device)
+
+        with self.lock, torch.no_grad():
+            output_ids = self.model.generate(
+                inputs,
+                max_new_tokens=150,
+                do_sample=False,
+                eos_token_id=self.tokenizer.eos_token_id
+            )
 
         generated_ids = output_ids[:, inputs.shape[-1]:]
 
@@ -121,16 +117,4 @@ NOW EXTRACT FROM THIS TEXT:
             skip_special_tokens=True
         )[0].strip()
 
-        decoded = decoded.strip()
-        result = self._extract_json(decoded)
-        return result
-
-
-# extractor = TextExtractor()
-
-# text = """
-# I have a lot of work this week. But my tooth has been aching so much. I need to book an appointment to the dentist for next Wednesday at 10am.
-# """
-
-# result = extractor.extract(text)
-# print(result)
+        return self._extract_json(decoded)

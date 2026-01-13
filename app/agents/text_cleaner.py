@@ -1,28 +1,23 @@
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
+import difflib
+from agents.llms.singleton import get_qwen
 
 
 class TextCleaner:
-    def __init__(self, model_id="Qwen/Qwen2.5-1.5B-Instruct"):
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-
-        self.tokenizer = AutoTokenizer.from_pretrained(model_id)
-        self.model = AutoModelForCausalLM.from_pretrained(
-            model_id,
-            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-            device_map="auto"
-        )
+    def __init__(self):
+        self.model, self.tokenizer, self.device, self.lock = get_qwen()
 
     def clean(self, text: str) -> str:
         messages = [
             {
                 "role": "system",
                 "content": (
-                    "You are a text normalization system. "
+                    "You are a text cleaning system. "
                     "Correct spelling, grammar, expand short forms, "
                     "remove extra spaces and line breaks, "
                     "and output everything in one single line. "
-                    "Do not add or remove information."
+                    "Do not add or remove information. "
+                    "Do not summarize the text."
                 )
             },
             {
@@ -34,11 +29,13 @@ class TextCleaner:
         inputs = self.tokenizer.apply_chat_template(
             messages,
             tokenize=True,
-            add_generation_prompt=False,
+            add_generation_prompt=True,
             return_tensors="pt"
-        ).to(self.model.device)
+        )
 
-        with torch.no_grad():
+        inputs = inputs.to(self.device)
+
+        with self.lock, torch.no_grad():
             output_ids = self.model.generate(
                 inputs,
                 max_new_tokens=200,
@@ -55,10 +52,16 @@ class TextCleaner:
 
         return cleaned_text
 
-# unit testing code 
-# cleaner = TextCleaner()
-# user_text = "Book an appt wit Pedeatician tmrw @ 5pm. Do not forget to buy vegetables tmrw."
-# cleaned_text = cleaner.clean(user_text)
+    def clean_to_json(self, text: str) -> dict:
+        cleaned_text = self.clean(text)
 
-# print(cleaned_text)
-# status ok
+        similarity = difflib.SequenceMatcher(
+            None,
+            text.lower(),
+            cleaned_text.lower()
+        ).ratio()
+
+        return {
+            "raw_text": cleaned_text,
+            "confidence": round(similarity, 2)
+        }

@@ -1,67 +1,63 @@
-from paddleocr import PaddleOCR
-from text_cleaner import TextCleaner
-## import os
-
+from agents.llms.singleton_ocr import get_ocr
+import numpy as np
+from flask import jsonify
 
 class OCRProcessor:
     def __init__(self):
-        self.ocr = PaddleOCR(
-            lang="en",
-            use_textline_orientation=True
-        )
+        self.ocr = get_ocr()
 
-    def extract_text(self, image_path: str) -> dict:
-        result = self.ocr.predict(image_path)
-        page = result[0]
+    def extract_text(self, image_array) -> dict:
+        """
+        Args:
+            image_input: Can be PIL.Image, np.ndarray, or file path (str)
+        """
+        try:
+            result = self.ocr.predict(image_array)
+            page = result[0]
 
-        boxes = (
-            page.get("dt_polys")
-            or page.get("det_polygons")
-            or page.get("det_boxes")
-        )
-
-        if boxes is None:
-            raise RuntimeError(f"No detection boxes found. Keys: {page.keys()}")
-
-        structured = [
-            {
-                "text": t,
-                "confidence": float(s),
-                "box": b
-            }
-            for t, s, b in zip(
-                page["rec_texts"],
-                page["rec_scores"],
-                boxes
+            boxes = (
+                page.get("dt_polys")
+                or page.get("det_polygons")
+                or page.get("det_boxes")
             )
-        ]
 
-        # Sort top-to-bottom, left-to-right
-        structured.sort(key=lambda x: (x["box"][0][1], x["box"][0][0]))
+            if boxes is None:
+                raise RuntimeError(
+                    f"No detection boxes found. Available keys: {page.keys()}"
+                )
 
-        raw_text = "\n".join(item["text"] for item in structured)
-        avg_conf = sum(item["confidence"] for item in structured) / len(structured)
+            structured = [
+                {
+                    "text": text,
+                    "confidence": float(score),
+                    "box": box
+                }
+                for text, score, box in zip(
+                    page.get("rec_texts", []),
+                    page.get("rec_scores", []),
+                    boxes
+                )
+            ]
 
-        return {
-            "raw_text": raw_text,
-            "average_confidence": avg_conf,
-            "structured": structured
-        }
+            if not structured:
+                return {
+                    "raw_text": "",
+                    "average_confidence": 0.0,
+                    "structured": []
+                }
 
+            # Sort top-to-bottom, left-to-right
+            structured.sort(
+                key=lambda x: (x["box"][0][1], x["box"][0][0])
+            )
 
-# unit testing code for ocr  
-# ocr = OCRProcessor()
-# cleaner = TextCleaner()
+            raw_text = "\n".join(item["text"] for item in structured)
+            avg_conf = sum(item["confidence"] for item in structured) / len(structured)
 
-# image_path = os.path.join(
-#     os.path.dirname(__file__), 
-#     "..",                      
-#     "sample_inputs",
-#     "test3.jpeg"
-# )
-
-# ocr_output = ocr.extract_text(image_path)
-# cleaned_text = cleaner.clean(ocr_output["raw_text"])
-
-# print(cleaned_text)
-# works as expected
+            return {
+                "raw_text": raw_text,
+                "average_confidence": round(avg_conf, 4),
+                "structured": structured
+            }
+        except Exception as e:
+            return jsonify({"error":f"OCR Processing issue: {str(e)}"})
