@@ -6,15 +6,12 @@ class OCRProcessor:
     def __init__(self):
         self.ocr = get_ocr()
 
-    def extract_text(self, image_array) -> dict:
-        """
-        Args:
-            image_input: Can be PIL.Image, np.ndarray, or file path (str)
-        """
+    def extract_text(self, image_array: np.ndarray) -> dict:
         try:
             result = self.ocr.predict(image_array)
             page = result[0]
 
+            # either one of these 3 might work
             boxes = (
                 page.get("dt_polys")
                 or page.get("det_polygons")
@@ -46,7 +43,7 @@ class OCRProcessor:
                     "structured": []
                 }
 
-            # Sort top-to-bottom, left-to-right
+            # sorting top-to-bottom, left-to-right
             structured.sort(
                 key=lambda x: (x["box"][0][1], x["box"][0][0])
             )

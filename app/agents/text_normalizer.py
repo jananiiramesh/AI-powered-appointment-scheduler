@@ -22,7 +22,9 @@ class TextNormalizer:
         json_str = text[start:end + 1].strip()
 
         try:
-            return json.loads(json_str)
+            normal = json.loads(json_str)
+            print(normal)
+            return normal
         except json.JSONDecodeError:
             return None
 
@@ -131,4 +133,14 @@ time_phrase: "{time_phrase}"
         ):
             return error
 
-        return result
+        final_result = {
+            "appointment":{
+                "department": department,
+                "date": result["normalized"]["date"],
+                "time": result["normalized"]["time"],
+                "tz": result["normalized"]["tz"]
+            },
+            "status": "ok"
+        }
+
+        return final_result

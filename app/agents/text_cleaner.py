@@ -61,7 +61,10 @@ class TextCleaner:
             cleaned_text.lower()
         ).ratio()
 
-        return {
+        clean = {
             "raw_text": cleaned_text,
             "confidence": round(similarity, 2)
         }
+
+        print(clean)
+        return clean

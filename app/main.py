@@ -17,8 +17,10 @@ print("agents have begun their work")
 
 @app.route("/classify", methods=["POST"])
 def classify_input():
+    # if its text input:
     if request.content_type == "text/plain":
         text = request.get_data(as_text=True)
+
 
         # clean the text to remove any short forms, special character usages
         cleaned_text = text_cleaner.clean_to_json(text)
@@ -34,7 +36,6 @@ def classify_input():
         image_file = request.files["image"]
 
         try:
-            #######################################
             image_bytes = image_file.read()
             try:
                 image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
@@ -44,7 +45,7 @@ def classify_input():
             image_array = np.array(image)
             ocr_text = ocr_engine.extract_text(image_array)
             
-            # Check if OCR returned valid text
+            # checking if OCR returned valid text
             if not ocr_text or 'raw_text' not in ocr_text:
                 return jsonify({"error": "No text extracted from image"}), 400
             # clean extracted text
@@ -55,19 +56,12 @@ def classify_input():
             normalized_entity = text_normalizer.normalize(extracted_entities)
 
             return jsonify(normalized_entity)
-
-            # return jsonify({
-            #     "input_type": "image",
-            #     "ocr_text": ocr_text,
-            #     "entities": extracted_entities,
-            #     "normalized_output": normalized_entity
-            # })
         
         except Exception as e:
             return jsonify({"error":"Invalid image"}), 400
 
-        
-    return jsonify({"error": "Unsupported input type"}), 400
+    else:    
+        return jsonify({"error": "Unsupported input type"}), 400
 
 if __name__ == "__main__":
     app.run(debug=True)

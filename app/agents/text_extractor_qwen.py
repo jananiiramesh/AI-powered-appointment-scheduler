@@ -5,7 +5,7 @@ from agents.llms.singleton import get_qwen
 
 class TextExtractor:
     def __init__(self):
-        # 🔹 Singleton model, tokenizer, device, lock
+        # singleton model
         self.model, self.tokenizer, self.device, self.lock = get_qwen()
 
     def _extract_json(self, text: str) -> dict | None:
@@ -26,7 +26,8 @@ class TextExtractor:
         json_str = text[start:end + 1].strip()
 
         try:
-            return json.loads(json_str)
+            extract = json.loads(json_str)
+            return extract
         except json.JSONDecodeError:
             return None
 
